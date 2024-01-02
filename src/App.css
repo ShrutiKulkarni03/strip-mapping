@@ -1,0 +1,32 @@
+/* src/App.css */
+
+body, html {
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* Disable scrolling for the entire page */
+  height: 100%;
+}
+
+.App {
+  text-align: center;
+  height: 100%;
+}
+
+.App-header {
+  background-color: #282c34;
+  padding: 20px;
+  color: white;
+}
+
+main {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%; /* Take up the full height of the viewport */
+}
+
+canvas {
+  width: 100vw; /* Take up the full width of the viewport */
+  height: 100vh; /* Take up the full height of the viewport */
+  display: block;
+}
