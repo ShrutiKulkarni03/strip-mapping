@@ -10,10 +10,16 @@ const BabylonScene: React.FC = () => {
       // Babylon.js code
       const engine = new BABYLON.Engine(sceneRef.current, true);
 
-      const createScene = () => {
+      const createScene = async () => {
         const scene = new BABYLON.Scene(engine);
         scene.useRightHandedSystem = true
         scene.clearColor = new BABYLON.Color4(0,0,0,1);
+
+        //fetch the json
+        const geofenceRes = fetch('jsons/geofence.json')
+        const geofenceData = (await geofenceRes).json()
+        
+
 
         // Create a light
         var light = new BABYLON.HemisphericLight("hemiLight", new BABYLON.Vector3(-1, 1, 0), scene);
@@ -53,9 +59,9 @@ const BabylonScene: React.FC = () => {
 
       const scene = createScene();
 
-      engine.runRenderLoop(() => {
+      engine.runRenderLoop(async () => {
         if (scene) {
-          scene.render();
+          (await scene).render();
         }
       });
 
