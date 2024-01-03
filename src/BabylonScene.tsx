@@ -1,6 +1,7 @@
 // src/BabylonScene.tsx
 import React, { useEffect, useRef } from 'react';
 import * as BABYLON from 'babylonjs';
+import 'babylonjs-loaders';
 
 const BabylonScene: React.FC = () => {
   const sceneRef = useRef<HTMLCanvasElement>(null);
@@ -17,18 +18,11 @@ const BabylonScene: React.FC = () => {
           return degrees * (Math.PI / 180);
         }
 
-        var earthToSatDist = 1.5;
+        var earthToSatDist = 2;
         
         const scene = new BABYLON.Scene(engine);
         scene.useRightHandedSystem = true;
         scene.clearColor = new BABYLON.Color4(0,0,0,1);
-
-        //fetch the json
-        const geofenceRes = fetch('jsons/geofence.json');
-        const geofenceData = (await geofenceRes).json();
-
-        // Create geofence mesh
-        // const geofenceMesh = createGeofenceMesh(geofenceData, scene);
 
         //light
         var light = new BABYLON.HemisphericLight("hemiLight", new BABYLON.Vector3(-1, 1, 0), scene);
@@ -40,8 +34,8 @@ const BabylonScene: React.FC = () => {
         var camera = new BABYLON.ArcRotateCamera("Camera", Math.PI/2, Math.PI/2, 4, BABYLON.Vector3.Zero(), scene);
         camera.minZ = 0.1;
         // Apply the panning range constraints
-        camera.lowerRadiusLimit = 1;
-        camera.upperRadiusLimit = 6;
+        camera.lowerRadiusLimit = 1.5;
+        camera.upperRadiusLimit = 7;
         camera.attachControl();
 
         // Skybox
@@ -62,7 +56,7 @@ const BabylonScene: React.FC = () => {
         earthMat.roughness = 1.0;    
 
         //earth
-        var earth = BABYLON.MeshBuilder.CreateSphere("earth", {segments: 30, diameter: 1.5}, scene);
+        var earth = BABYLON.MeshBuilder.CreateSphere("earth", {segments: 30, diameter: 2}, scene);
         earth.material = earthMat;
 
         //satellite
@@ -81,23 +75,36 @@ const BabylonScene: React.FC = () => {
         cone.material = coneMat;
         coneMat.unlit = true;
 
-        // // Function to convert latitude and longitude to 3D coordinates
-        // function latLonToCoordinates(latitude: number, longitude: number, radius: number): BABYLON.Vector3 {
-        //   const phi = toRadians(90 - latitude);
-        //   const theta = toRadians(longitude + 180);
-          
-        //   const x = radius * Math.sin(phi) * Math.cos(theta);
-        //   const y = radius * Math.cos(phi);
-        //   const z = radius * Math.sin(phi) * Math.sin(theta);
-          
-        //   return new BABYLON.Vector3(x, y, z);
-        // }
+        //material for lines
+        const lineMat = new BABYLON.StandardMaterial('linesmat', scene);
+        // lineMat.diffuseColor = new BABYLON.Color3(1,1,1);
+        // lineMat.alpha = 1;
 
-        // // Example usage:
+        // Add latitude lines
+        for (let lat = -90; lat <= 90; lat += 1) {
+          const myPoints = [];
+          const myColors = [new BABYLON.Color4(1, 1, 0, 1)];
+          for (let lon = -180; lon <= 180; lon += 1) {
+              const vector = latLonToVector(lat, lon);
+              myPoints.push(new BABYLON.Vector3(vector.x, vector.y, vector.z));
+          }
+          const lines = BABYLON.MeshBuilder.CreateLines('latLine', { points: myPoints}, scene);
+          lines.alpha = 0.05;
+        }
 
-        // var satellite = BABYLON.MeshBuilder.CreateSphere("satellite", {segments: 20, diameter: 0.5}, scene);
-        // const coordinates = latLonToCoordinates(37.7749, -122.4194, 2); // San Francisco
-        // satellite.position = coordinates;
+        // Add longitude lines
+        for (let lon = -180; lon <= 180; lon += 1) {
+          const myPoints = [];
+          for (let lat = -90; lat <= 90; lat += 1) {
+              const vector = latLonToVector(lat, lon);
+              myPoints.push(new BABYLON.Vector3(vector.x, vector.y, vector.z));
+          }
+          // Connect the last point to the first to create a closed path
+          myPoints.push(myPoints[0]);
+          const lines = BABYLON.MeshBuilder.CreateLines('lonLine', { points: myPoints }, scene);
+          lines.alpha = 0.05;
+        }
+
 
          // Animation
         var angle = 0;
@@ -115,46 +122,7 @@ const BabylonScene: React.FC = () => {
         return scene;
       };
 
-      const createGeofenceMesh = (geojson: any, scene: BABYLON.Scene) => {
-        // Check if geojson and its features array exist
-        if (!geojson || !geojson.features || !Array.isArray(geojson.features) || geojson.features.length === 0) {
-          console.error('Invalid GeoJSON data');
-          return null; // or handle the error in a way that makes sense for your application
-        }
-      
-        // Get the first feature's geometry
-        const geometry = geojson.features[0].geometry;
-      
-        // Check if the geometry and coordinates array exist
-        if (!geometry || !geometry.coordinates || !Array.isArray(geometry.coordinates) || geometry.coordinates.length === 0) {
-          console.error('Invalid GeoJSON geometry');
-          return null; // or handle the error
-        }
-      
-        const coordinates = geometry.coordinates[0];
-      
-        // Check if coordinates array is valid
-        if (!Array.isArray(coordinates) || coordinates.length < 3) {
-          console.error('Invalid GeoJSON coordinates');
-          return null; // or handle the error
-        }
-      
-        // Convert GeoJSON coordinates to Babylon.js Vector3 array
-        const positions = coordinates.map(coordinate => {
-          const lon = coordinate[0];
-          const lat = coordinate[1];
-          const altitude = 0; // You can adjust this if needed
-          return new BABYLON.Vector3(lon, altitude, lat);
-        });
-      
-        // Create polygon from the positions
-        const polygon = BABYLON.MeshBuilder.CreatePolygon('geofencePolygon', { shape: positions }, scene);
-      
-        // Customize the appearance of the geofence mesh if needed
-      
-        return polygon;
-      };
-      
+
       const scene = createScene();
 
       engine.runRenderLoop(async () => {
@@ -175,5 +143,17 @@ const BabylonScene: React.FC = () => {
 
   return <canvas ref={sceneRef} />;
 };
+
+function latLonToVector(lat: number, lon: number): BABYLON.Vector3 {
+  const radius = 1;
+  const phi = (90 - lat) * (Math.PI / 180);
+  const theta = (lon + 180) * (Math.PI / 180);
+
+  const x = radius * Math.sin(phi) * Math.cos(theta);
+  const y = radius * Math.cos(phi);
+  const z = radius * Math.sin(phi) * Math.sin(theta);
+
+  return new BABYLON.Vector3(x, y, z);
+}
 
 export default BabylonScene;
