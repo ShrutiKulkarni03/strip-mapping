@@ -1,7 +1,8 @@
 // src/BabylonScene.tsx
 import React, { useEffect, useRef } from 'react';
-import * as BABYLON from 'babylonjs';
+import * as BABYLON from '@babylonjs/core';
 import 'babylonjs-loaders';
+import earcut from 'earcut';
 
 const BabylonScene: React.FC = () => {
   const sceneRef = useRef<HTMLCanvasElement>(null);
@@ -53,7 +54,8 @@ const BabylonScene: React.FC = () => {
         earthMat.albedoTexture = new BABYLON.Texture("assets/8k_earth_daymap.jpg", scene, undefined, false);
         earthMat.bumpTexture = new BABYLON.Texture("assets/8k_earth_normal_map.jpg", scene, undefined, false);
         earthMat.metallic = 0.0;
-        earthMat.roughness = 1.0;    
+        earthMat.roughness = 1.0;   
+        earthMat.alpha = 0.2; 
 
         //earth
         var earth = BABYLON.MeshBuilder.CreateSphere("earth", {segments: 30, diameter: 2}, scene);
@@ -75,15 +77,9 @@ const BabylonScene: React.FC = () => {
         cone.material = coneMat;
         coneMat.unlit = true;
 
-        //material for lines
-        const lineMat = new BABYLON.StandardMaterial('linesmat', scene);
-        // lineMat.diffuseColor = new BABYLON.Color3(1,1,1);
-        // lineMat.alpha = 1;
-
         // Add latitude lines
         for (let lat = -90; lat <= 90; lat += 1) {
           const myPoints = [];
-          const myColors = [new BABYLON.Color4(1, 1, 0, 1)];
           for (let lon = -180; lon <= 180; lon += 1) {
               const vector = latLonToVector(lat, lon);
               myPoints.push(new BABYLON.Vector3(vector.x, vector.y, vector.z));
@@ -105,6 +101,70 @@ const BabylonScene: React.FC = () => {
           lines.alpha = 0.05;
         }
 
+      // // Your polygon points
+      // const polygonPoints = [
+      //   new BABYLON.Vector3(0, 0, 0),
+      //   new BABYLON.Vector3(2, 0, 0),
+      //   new BABYLON.Vector3(2, 2, 0),
+      //   new BABYLON.Vector3(1, 3, 0),
+      //   new BABYLON.Vector3(0, 2, 0),
+      // ];
+
+      // // Flatten the polygon points to 2D array
+      // const flatPoints = polygonPoints.map((point) => [point.x, point.y]);
+
+      // // Use earcut for triangulation
+      // const indices = earcut(flatPoints.flat());
+
+      // // Convert the indices to Vector3 points
+      // const shapePoints: BABYLON.Vector3[] = [];
+      // for (let i = 0; i < indices.length; i += 2) {
+      //   const index = indices[i];
+      //   shapePoints.push(new BABYLON.Vector3(flatPoints[index][0], flatPoints[index][1], 0));
+      // }
+
+      // // Create the polygon using the Vector3 points
+      // const polygon = BABYLON.MeshBuilder.CreatePolygon('polygon', { shape: shapePoints, sideOrientation: BABYLON.Mesh.DOUBLESIDE });
+
+        // Extract coordinates from GeoJSON
+        const coordinates = [
+          [
+            69.52189959523031,
+            28.613067454540413
+          ],
+          [
+            69.52189959523031,
+            10.87416257804648
+          ],
+          [
+            88.35091450953263,
+            10.87416257804648
+          ],
+          [
+            88.35091450953263,
+            28.613067454540413
+          ],
+          [
+            69.52189959523031,
+            28.613067454540413
+          ]
+        ];
+
+        // Create Babylon.js polygon using PolygonMeshBuilder
+        const polygonPoints = coordinates.map(coord => {
+          const vector = latLonToVector(coord[1], coord[0]);
+          return new BABYLON.Vector3(vector.x, vector.y, vector.z);
+        });
+
+        const polygonMeshBuilder = new BABYLON.PolygonMeshBuilder('customPolygon', polygonPoints, scene, earcut);
+        const polygon = polygonMeshBuilder.build();
+        const polygonMaterial = new BABYLON.StandardMaterial('polygonMaterial', scene);
+        polygonMaterial.diffuseColor = new BABYLON.Color3(1, 0, 0); // Red color for the polygon
+        polygonMaterial.alpha = 1; // Set transparency
+        polygonMaterial.backFaceCulling = false;
+        polygon.material = polygonMaterial;
+        polygon.parent = earth;
+        // polygon.rotation.x = toRadians(90);
 
          // Animation
         var angle = 0;
