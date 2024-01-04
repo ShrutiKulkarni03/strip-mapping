@@ -166,41 +166,6 @@ const BabylonScene: React.FC = () => {
           return new BABYLON.Vector3(vector.x, vector.y, vector.z);
         });
 
-        // // Assuming you have defined latLonToVector function with appropriate types
-
-        // // Define the displacement values
-        // const displacementX: number = -0.1; // Example: move 10 units in the x-direction
-        // const displacementY: number = 0.2; // Example: move 5 units in the y-direction
-        // const displacementZ: number = -1.3; // Example: move 0 units in the z-direction
-
-        // // // Define the rotation angles in radians
-        // const rotationX: number = toRadians(0) // Example: rotate 45 degrees around the x-axis
-        // const rotationY: number = toRadians(0) // Example: rotate 30 degrees around the y-axis
-        // const rotationZ: number = toRadians(0) // Example: rotate 22.5 degrees around the z-axis
-
-        // // Create a transform node for the polygon
-        // const transformNode: BABYLON.TransformNode = new BABYLON.TransformNode(
-        //   "polygonTransform",
-        //   scene
-        // );
-
-        // // Move each vertex in the polygon by the specified displacements
-        // const displacedPolygonPoints: BABYLON.Vector3[] = polygonPoints.map(
-        //   (coord: BABYLON.Vector3) => {
-        //     const displacedX: number = coord.x + displacementX;
-        //     const displacedY: number = coord.y + displacementY;
-        //     const displacedZ: number = coord.z + displacementZ;
-
-        //     return new BABYLON.Vector3(displacedX, displacedY, displacedZ);
-        //   }
-        // );
-
-
-        // // Reverse the order of vertices in the polygonPoints array
-        // const reversedPolygonPoints = polygonPoints.reverse();
-
-        // // Create Babylon.js polygon using PolygonMeshBuilder with reversed order
-        // // const polygonMeshBuilder = new BABYLON.PolygonMeshBuilder('customPolygon', reversedPolygonPoints, scene, earcut);
         
         // Create Babylon.js polygon using PolygonMeshBuilder with the displaced vertices
         const polygonMeshBuilder: BABYLON.PolygonMeshBuilder =
