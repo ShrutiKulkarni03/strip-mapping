@@ -1,0 +1,48 @@
+Project Documentation: 3D Earth Visualization with GeoJSON Data
+
+Project Overview:
+I have developed a project utilizing React, Babylon.js, and TypeScript to create a 3D visualization of Earth with satellite orbit and geofence functionality. The main components include rendering a space environment with a skybox, representing Earth as a sphere, and displaying a satellite with a circular orbit and a cone of coverage of approximately 14km. In the current state of the project, the transparency of the Earth has been set to 50%. This adjustment has been made to ensure visibility of the yellow geofence polygon after navigation.
+
+Implementation Details:
+
+Earth Representation:
+-The Earth is rendered as a sphere.
+-Latitudes and longitudes are calculated to accurately position features on the Earth's surface.
+
+Satellite Orbit:
+-The satellite is represented with a circular orbit.
+
+Geofence Integration:
+-GeoJSON data for geofencing is stored in geofence.json.
+-Coordinates are fetched from the main file.
+-The polygon shape is drawn based on the coordinates.
+-Vector positions (x, y, z) are computed based on latitudes and longitudes.
+
+Current Issues:
+-The polygon intersects with the Earth instead of being properly mapped to its surface.
+-The orientation and position of the polygon do not align correctly with the Earth's surface.
+
+
+Pending Tasks:
+
+Exact Mapping of Polygon on Earth's Surface:
+-Resolve the issue of the polygon intersecting with the Earth.
+-Ensure accurate mapping of the geofence polygon to the Earth's surface.
+
+Strip Mapping:
+-Implement strip mapping functionality for improved visualization and accuracy.
+
+
+Proposed Solution:
+Due to challenges in the 3D approach, consider transitioning to a new approach where the Earth's map is represented as a complete 2D mesh. This would involve creating a top-down view, simplifying the visualization while potentially resolving mapping issues.
+
+
+Next Steps:
+
+-Experiment with the 2D mesh approach.
+-Implement necessary adjustments to achieve an accurate mapping of the geofence polygon on the Earth's surface.
+-Integrate strip mapping functionality for improved visualization.
+
+
+Conclusion:
+The project aims to provide an immersive 3D visualization of Earth with satellite orbit and geofence features. By addressing the current mapping issues and exploring alternative approaches, we aim to enhance the accuracy and visual appeal of the Earth representation in the application.
